@@ -1,0 +1,177 @@
+/* --- RESET --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  background-color: #121212; /* Fond noir autour de l'appli */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: white;
+}
+
+/* --- LE TÉLÉPHONE --- */
+.tiktok-app {
+  width: 375px;
+  height: 812px;
+  background-color: #000;
+  border-radius: 40px;
+  border: 8px solid #333; /* Contour fin et sombre */
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+}
+
+/* --- IMAGE DE FOND --- */
+#bg-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+/* --- DÉGRADÉS (Pour la lisibilité) --- */
+.overlay-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  /* Sombre en haut (pour les genres) et très sombre en bas (pour le texte) */
+  background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 20%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.85) 100%);
+}
+
+/* --- EN HAUT : LES GENRES --- */
+.top-bar {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+}
+
+.genre-list {
+  display: flex;
+  gap: 10px;
+  padding: 0 20px;
+  overflow-x: auto;
+  /* Cache la barre de défilement (Scrollbar) */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.genre-list::-webkit-scrollbar {
+  display: none;
+}
+
+.genre-pill {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px); /* Effet verre dépoli iOS/TikTok */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.genre-pill.active, .genre-pill:hover {
+  background: white;
+  color: black;
+}
+
+/* --- EN BAS : CONTENU --- */
+.bottom-area {
+  position: absolute;
+  bottom: 30px;
+  left: 0;
+  width: 100%;
+  padding: 0 20px;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+/* Infos Musique (Gauche) */
+.track-info {
+  flex: 1;
+  padding-right: 20px;
+}
+
+#track-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 5px;
+  line-height: 1.1;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+#track-artist {
+  font-size: 16px;
+  font-weight: 400;
+  opacity: 0.9;
+  margin-bottom: 12px;
+}
+
+.music-animation {
+  font-size: 13px;
+  background: rgba(0, 0, 0, 0.4);
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 15px;
+  backdrop-filter: blur(5px);
+}
+
+/* Actions Sidebar (Droite) */
+.action-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  gap: 5px;
+  transition: transform 0.2s;
+}
+
+.action-btn:active {
+  transform: scale(0.85);
+}
+
+.icon-circle {
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.action-btn span {
+  font-size: 12px;
+  font-weight: 600;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}

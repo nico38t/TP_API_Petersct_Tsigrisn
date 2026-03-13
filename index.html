@@ -1,118 +1,66 @@
 <!DOCTYPE html>
-<html lang="fr" dir="ltr">
-  <head>
-    <title>Recherche d'offres d'emploi</title>
-    <meta charset="utf-8" />
-    <link rel="shortcut icon" type="image/x-icon" href="favicon-js.ico" />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZikSwipe - Mode TikTok</title>
+  <link rel="stylesheet" href="static/css/styles.css">
+</head>
+<body>
 
-  <body>
-    <header>
-      <h1>Recherche d'offres d'emploi</h1>
+<div class="tiktok-app">
 
-      <p id="explication">
-        Cette page permet de rechercher des offres d'emploi via l'API publique
-        de <a href="https://www.indeed.fr/" target="_blank">indeed.fr</a>.<br />
-        Saisir le nom d'une ville, d'un poste, ... pour rechercher les postes
-        correspondants, et enregistrer vos recherches favorites pour les
-        retrouver facilement.
-      </p>
-    </header>
-    <hr />
+  <img id="bg-cover" src="https://cdn-images.dzcdn.net/images/cover/311bba0fc112d15f72c8b5a65f0456c1/1000x1000-000000-80-0-0.jpg" alt="Pochette en plein écran">
 
-    <main id="conteneur">
-      <!-- Section de recherche (avec résultats) -->
-      <section id="section-recherche">
-        <div id="bloc-recherche">
-          <!-- Champ de recherche -->
-          <input type="text" placeholder="Que cherchez-vous ?" />
+  <div class="overlay-gradient"></div>
 
-          <!-- Boutons -->
-          <button
-            id="btn-lancer-recherche"
-            type="button"
-            class="btn_clicable"
-            title="Lancer la recherche"
-          >
-            <!-- Icone Loupe (provenant de flaticon.com) -->
-            <img src="images/loupe.svg" alt="Loupe pour recherche" width="22" />
-          </button>
+  <header class="top-bar">
+    <div class="genre-list" id="genre-list">
+      <button class="genre-pill active">Top</button>
+      <button class="genre-pill">Rap</button>
+      <button class="genre-pill">Électro</button>
+      <button class="genre-pill">Pop</button>
+      <button class="genre-pill">Rock</button>
+      <button class="genre-pill">R&B</button>
+    </div>
+  </header>
 
-          <button
-            id="btn-favoris"
-            type="button"
-            disabled
-            title="Ajouter la recherche aux favoris"
-          >
-            <!-- Icone étoile vide
-							(qui indique que la recherche ne fait pas partie des favoris) -->
-            <img src="images/etoile-vide.svg" alt="Etoile vide" width="22" />
+  <main class="bottom-area">
 
-            <!-- Icone étoile pleine
-								(qui indique que la recherche fait partie des favoris) -->
-            <!-- <img src="images/etoile-pleine.svg" alt="Etoile pleine" width="22" > -->
+    <div class="track-info">
+      <h1 id="track-title">Instant Crush</h1>
+      <h2 id="track-artist">Daft Punk</h2>
+      <div class="music-animation">
+        <span class="music-note">🎵</span> En cours de lecture...
+      </div>
 
-            <!-- (Les 2 icones d'étoile provenant de flaticon.com) -->
-          </button>
-        </div>
 
-        <!-- Résultats de recherche -->
-        <div id="bloc-gif-attente">
-          <img
-            src="images/attente-ajax.gif"
-            alt="GIF Attente de résultats"
-            width="50"
-          />
-        </div>
-        <div id="bloc-resultats">
-          <p class="res">Résultat 1 ...</p>
-          <p class="res">Résultat 2 ...</p>
-          <p class="res">Résultat 3 ...</p>
-          <p class="info-vide">(Aucun résultat trouvé)</p>
-        </div>
-      </section>
 
-      <!-- Section de séparation (avec la bordure verte) -->
-      <section id="section-separation"></section>
+    </div>
 
-      <!-- Section des recherches favorites -->
-      <section id="section-favoris">
-        <h2>Recherches favorites</h2>
-        <p>
-          Cliquer sur une recherche favorite ci-dessus pour relancer celle-ci :
-        </p>
-        <ul id="liste-favoris">
-          <li>
-            <span title="Cliquer pour relancer la recherche">Grenoble</span>
-            <img
-              src="images/croix.svg"
-              alt="Icone pour supprimer le favori"
-              width="15"
-              title="Cliquer pour supprimer le favori"
-            />
-          </li>
-          <li>
-            <span title="Cliquer pour relancer la recherche">Lyon</span>
-            <img
-              src="images/croix.svg"
-              alt="Icone pour supprimer le favori"
-              width="15"
-              title="Cliquer pour supprimer le favori"
-            />
-          </li>
-          <li>
-            <span title="Cliquer pour relancer la recherhe.">Web</span>
-            <img
-              src="images/croix.svg"
-              alt="Icone pour supprimer le favori"
-              width="15"
-              title="Cliquer pour supprimer le favori"
-            />
-          </li>
-        </ul>
-        <p class="info-vide">(Aucune recherche favorite)</p>
-      </section>
-    </main>
-  </body>
+    <div class="action-sidebar">
+      <button class="action-btn btn-like" id="btn-like">
+        <div class="icon-circle">💚</div>
+        <span>Favori</span>
+      </button>
+
+      <button class="action-btn btn-pass" id="btn-pass">
+        <div class="icon-circle">❌</div>
+        <span>Passer</span>
+      </button>
+      <audio
+              id="audio-player"
+              src="https://cdnt-preview.dzcdn.net/api/1/1/d/6/b/0/d6bc80aadfa1d7625d59a6620f229371.mp3?hdnea=exp=1773408897~acl=/api/1/1/d/6/b/0/d6bc80aadfa1d7625d59a6620f229371.mp3*~data=user_id=0,application_id=42~hmac=92b360521ff79aa304c3b68c7d752a70b4c33f6d7b2e0d2c090eaa571596440d"
+              preload="auto">
+      </audio>
+    </div>
+
+  </main>
+</div>
+
+
+<script>
+
+</script>
+</body>
 </html>
