@@ -50,31 +50,39 @@ body {
   background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 20%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.85) 100%);
 }
 
-/* --- EN HAUT : LES GENRES --- */
+/* --- EN HAUT : LES GENRES ET RECHERCHE --- */
 .top-bar {
   position: absolute;
   top: 40px;
   left: 0;
   width: 100%;
   z-index: 10;
+
+  /* Lignes ajoutées pour aligner la liste et l'icône */
+  display: flex;
+  justify-content: space-between; /* Pousse la liste à gauche et l'icône à droite */
+  align-items: center; /* Centre les éléments verticalement */
+  padding-right: 20px; /* Marge pour ne pas coller l'icône au bord droit */
 }
 
 .genre-list {
   display: flex;
   gap: 10px;
-  padding: 0 20px;
+  padding-left: 20px;
+  padding-right: 15px;
   overflow-x: auto;
-  /* Cache la barre de défilement (Scrollbar) */
   -ms-overflow-style: none;
   scrollbar-width: none;
+  flex: 1; /* Laisse la liste prendre la place disponible sans écraser l'icône */
 }
+
 .genre-list::-webkit-scrollbar {
   display: none;
 }
 
 .genre-pill {
   background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px); /* Effet verre dépoli iOS/TikTok */
+  backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
   padding: 8px 16px;
@@ -89,6 +97,22 @@ body {
 .genre-pill.active, .genre-pill:hover {
   background: white;
   color: black;
+}
+
+/* Nouveau style propre pour le bouton de recherche */
+.search-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+/* Petit effet quand on clique dessus */
+.search-icon:active {
+  transform: scale(0.85);
 }
 
 /* --- EN BAS : CONTENU --- */
