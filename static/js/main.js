@@ -40,9 +40,7 @@ function chargerGenres() {
         .catch(err => console.error("Erreur chargement genres :", err));
 }
 
-// ==========================================
-// 2. CHARGER LA MUSIQUE (PAR GENRE)
-// ==========================================
+
 function chargerMusiqueParGenreId(genreId) {
     const urlDeezer = `https://api.deezer.com/chart/${genreId}/tracks?limit=20`;
     const urlProxy = `https://corsproxy.io/?${encodeURIComponent(urlDeezer)}`;
@@ -52,7 +50,7 @@ function chargerMusiqueParGenreId(genreId) {
         .then(data => {
             if (data.data && data.data.length > 0) {
                 playlistActuelle = data.data;
-                // On commence à un endroit au hasard dans la liste
+
                 indexMusiqueActuelle = Math.floor(Math.random() * playlistActuelle.length);
                 mettreAJourLecteur(playlistActuelle[indexMusiqueActuelle]);
             }
@@ -167,7 +165,7 @@ function passerMusiqueSuivante() {
 const btnRecherche = document.getElementById('btn-search');
 if (btnRecherche) {
     btnRecherche.addEventListener('click', function() {
-        let motCle = prompt("Quel artiste ou titre cherches-tu ?");
+
         if (motCle && motCle.trim() !== "") {
             rechercherMusiqueLibre(motCle);
         }
@@ -202,4 +200,24 @@ if (appContainer) {
 // ==========================================
 // LANCEMENT DE L'APPLICATION
 // ==========================================
+
+// Sélection des éléments
+const btnSearch = document.getElementById('btn-search');
+const btnSearchQuit = document.getElementById('btn-search-quit');
+const slidebar = document.querySelector('.slidebar');
+
+// Ouvrir la recherche
+btnSearch.addEventListener('click', () => {
+    slidebar.classList.add('active');
+    // Optionnel : mettre le focus sur l'input automatiquement
+    slidebar.querySelector('input').focus();
+});
+
+// Fermer la recherche
+btnSearchQuit.addEventListener('click', () => {
+    slidebar.classList.remove('active');
+});
 chargerGenres();
+
+
+

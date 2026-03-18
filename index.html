@@ -3,23 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SoundSwipe - Mode TikTok</title>
+  <title>SoundSwipe - TikTok Music</title>
   <link rel="stylesheet" href="static/css/styles.css">
 </head>
 <body>
 
 <div class="tiktok-app">
 
-  <img id="bg-cover" src="">
-
+  <img id="bg-cover" src="" alt="Cover Art">
   <div class="overlay-gradient"></div>
 
   <header class="top-bar">
     <div class="genre-list" id="genre-list">
-      <button class="genre-pill active">Top</button>
-      <button class="genre-pill">Rap</button>
-      <button class="genre-pill">House</button>
-      <button class="genre-pill">Pop</button>
+      <button class="genre-pill active">Chargement...</button>
     </div>
 
     <button id="btn-search" class="search-icon">
@@ -27,27 +23,21 @@
         <circle cx="11" cy="11" r="8"></circle>
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
       </svg>
-
-
     </button>
   </header>
 
   <main class="bottom-area">
-
     <div class="track-info">
-      <h1 id="track-title">Instant Crush</h1>
-      <h2 id="track-artist">Daft Punk</h2>
+      <h1 id="track-title">Chargement...</h1>
+      <h2 id="track-artist">Artiste</h2>
       <div class="music-animation">
         <span class="music-note">🎵</span> En cours de lecture...
       </div>
-
-
-
     </div>
 
     <div class="action-sidebar">
       <button class="action-btn btn-like" id="btn-like">
-        <div class="icon-circle"><img src="ima" alt=""></div>
+        <div class="icon-circle">❤️</div>
         <span>Favori</span>
       </button>
 
@@ -55,17 +45,50 @@
         <div class="icon-circle">❌</div>
         <span>Passer</span>
       </button>
-      <audio
-              id="audio-player"
-              src="https://cdnt-preview.dzcdn.net/api/1/1/d/6/b/0/d6bc80aadfa1d7625d59a6620f229371.mp3?hdnea=exp=1773408897~acl=/api/1/1/d/6/b/0/d6bc80aadfa1d7625d59a6620f229371.mp3*~data=user_id=0,application_id=42~hmac=92b360521ff79aa304c3b68c7d752a70b4c33f6d7b2e0d2c090eaa571596440d"
-              preload="auto">
-      </audio>
     </div>
 
+    <audio id="audio-player" src="" preload="auto"></audio>
   </main>
-</div>
 
+  <div class="slidebar" id="search-bar">
+    <div class="search-header">
+      <button id="btn-search-quit" class="search-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <input type="text" id="search-input" placeholder="Rechercher une musique...">
+    </div>
 
-<script src="static/js/main.js"></script>
+    <div class="search-content">
+      <section class="search-section">
+        <h3>Mes favoris</h3>
+        <div class="grid-scroll" id="favorites-grid">
+          <div class="card-placeholder">️</div>
+          <div class="card-placeholder"></div>
+          <div class="card-placeholder"></div>
+        </div>
+      </section>
+
+      <section class="search-section">
+        <h3>Genres</h3>
+        <div class="grid-scroll" id="genres-grid">
+          <div class="card-placeholder">Rap</div>
+          <div class="card-placeholder">Pop</div>
+          <div class="card-placeholder">Rock</div>
+        </div>
+      </section>
+
+      <section class="search-section">
+        <h3>Artistes</h3>
+        <div class="grid-scroll" id="artists-grid">
+          <div class="card-placeholder"></div>
+          <div class="card-placeholder"></div>
+          <div class="card-placeholder"></div>
+        </div>
+      </section>
+    </div>
+  </div></div><script src="static/js/main.js"></script>
 </body>
 </html>

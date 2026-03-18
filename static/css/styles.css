@@ -1,4 +1,4 @@
-/* --- RESET --- */
+/* --- RESET & BASE --- */
 * {
   margin: 0;
   padding: 0;
@@ -6,28 +6,45 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
+/* On centre l'appli sur les grands écrans */
 body {
-  background-color: #121212; /* Fond noir autour de l'appli */
+  background-color: #121212;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
   color: white;
+  overflow: hidden; /* Empêche le scroll du body sur PC */
 }
 
-/* --- LE TÉLÉPHONE --- */
+/* --- LE CONTENEUR TÉLÉPHONE (MODE DESKTOP PAR DÉFAUT) --- */
 .tiktok-app {
   width: 375px;
   height: 812px;
   background-color: #000;
   border-radius: 40px;
-  border: 8px solid #333; /* Contour fin et sombre */
+  border: 8px solid #333;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease; /* Transition fluide si on redimensionne */
 }
 
-/* --- IMAGE DE FOND --- */
+/* --- ADAPTATION RESPONSIVE (MOBILE) --- */
+@media (max-width: 500px) {
+  .tiktok-app {
+    width: 100vw;   /* 100% de la largeur écran */
+    height: 100vh;  /* 100% de la hauteur écran */
+    border-radius: 0; /* On enlève les arrondis sur mobile */
+    border: none;    /* On enlève les bordures de "faux téléphone" */
+  }
+
+  body {
+    background-color: #000; /* Fond noir total sur mobile */
+  }
+}
+
+/* --- ÉCRAN PRINCIPAL (LECTEUR) --- */
 #bg-cover {
   width: 100%;
   height: 100%;
@@ -38,7 +55,6 @@ body {
   z-index: 1;
 }
 
-/* --- DÉGRADÉS (Pour la lisibilité) --- */
 .overlay-gradient {
   position: absolute;
   top: 0;
@@ -46,39 +62,34 @@ body {
   width: 100%;
   height: 100%;
   z-index: 2;
-  /* Sombre en haut (pour les genres) et très sombre en bas (pour le texte) */
-  background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 20%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.85) 100%);
+  background: linear-gradient(to bottom,
+  rgba(0,0,0,0.6) 0%,
+  rgba(0,0,0,0) 25%,
+  rgba(0,0,0,0) 60%,
+  rgba(0,0,0,0.9) 100%);
 }
 
-/* --- EN HAUT : LES GENRES ET RECHERCHE --- */
+/* Barre du haut */
 .top-bar {
   position: absolute;
-  top: 40px;
+  top: 50px;
   left: 0;
   width: 100%;
   z-index: 10;
-
-  /* Lignes ajoutées pour aligner la liste et l'icône */
   display: flex;
-  justify-content: space-between; /* Pousse la liste à gauche et l'icône à droite */
-  align-items: center; /* Centre les éléments verticalement */
-  padding-right: 20px; /* Marge pour ne pas coller l'icône au bord droit */
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
 }
 
 .genre-list {
   display: flex;
   gap: 10px;
-  padding-left: 20px;
-  padding-right: 15px;
   overflow-x: auto;
-  -ms-overflow-style: none;
   scrollbar-width: none;
-  flex: 1; /* Laisse la liste prendre la place disponible sans écraser l'icône */
+  flex: 1;
 }
-
-.genre-list::-webkit-scrollbar {
-  display: none;
-}
+.genre-list::-webkit-scrollbar { display: none; }
 
 .genre-pill {
   background: rgba(255, 255, 255, 0.2);
@@ -87,38 +98,24 @@ body {
   color: white;
   padding: 8px 16px;
   border-radius: 20px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.2s ease;
 }
+.genre-pill.active { background: white; color: black; }
 
-.genre-pill.active, .genre-pill:hover {
-  background: white;
-  color: black;
-}
-
-/* Nouveau style propre pour le bouton de recherche */
 .search-icon {
   background: none;
   border: none;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s;
+  padding-left: 15px;
 }
 
-/* Petit effet quand on clique dessus */
-.search-icon:active {
-  transform: scale(0.85);
-}
-
-/* --- EN BAS : CONTENU --- */
+/* Zone du bas */
 .bottom-area {
   position: absolute;
-  bottom: 30px;
+  bottom: 40px;
   left: 0;
   width: 100%;
   padding: 0 20px;
@@ -128,37 +125,18 @@ body {
   align-items: flex-end;
 }
 
-/* Infos Musique (Gauche) */
-.track-info {
-  flex: 1;
-  padding-right: 20px;
-}
-
-#track-title {
-  font-size: 28px;
-  font-weight: 800;
-  margin-bottom: 5px;
-  line-height: 1.1;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-}
-
-#track-artist {
-  font-size: 16px;
-  font-weight: 400;
-  opacity: 0.9;
-  margin-bottom: 12px;
-}
+.track-info { flex: 1; }
+#track-title { font-size: 26px; font-weight: 800; margin-bottom: 4px; }
+#track-artist { font-size: 16px; opacity: 0.8; margin-bottom: 15px; }
 
 .music-animation {
-  font-size: 13px;
-  background: rgba(0, 0, 0, 0.4);
-  display: inline-block;
-  padding: 5px 12px;
-  border-radius: 15px;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 6px 12px;
+  border-radius: 20px;
   backdrop-filter: blur(5px);
 }
 
-/* Actions Sidebar (Droite) */
 .action-sidebar {
   display: flex;
   flex-direction: column;
@@ -172,30 +150,74 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  cursor: pointer;
   gap: 5px;
-  transition: transform 0.2s;
-}
-
-.action-btn:active {
-  transform: scale(0.85);
+  cursor: pointer;
 }
 
 .icon-circle {
   width: 50px;
   height: 50px;
   background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 22px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  backdrop-filter: blur(10px);
 }
 
-.action-btn span {
-  font-size: 12px;
-  font-weight: 600;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+/* --- SLIDEBAR DE RECHERCHE --- */
+.slidebar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #121212;
+  z-index: 100;
+  padding: 60px 20px;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1);
 }
+
+.slidebar.active { transform: translateY(0); }
+
+.search-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.search-header input {
+  flex: 1;
+  background: #222;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 12px;
+  color: white;
+  outline: none;
+}
+
+/* Sections & Grilles */
+.search-content { display: flex; flex-direction: column; gap: 30px; }
+.search-section h3 { font-size: 14px; color: #888; margin-bottom: 15px; }
+
+.grid-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.grid-scroll::-webkit-scrollbar { display: none; }
+
+.card-placeholder {
+  min-width: 110px;
+  height: 110px;
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+button:active { transform: scale(0.9); }
