@@ -19,6 +19,8 @@ function chargerGenres() {
                 topGenres.forEach((genre, index) => {
                     const btn = document.createElement('button');
                     btn.className = 'genre-pill';
+
+                    const affichagegenre = document.createElement('div');
                     if (index === 0) btn.classList.add('active');
 
                     btn.textContent = genre.name;
@@ -219,5 +221,59 @@ btnSearchQuit.addEventListener('click', () => {
 });
 chargerGenres();
 
+
+function actualiserGrilleRechercheGenres() {
+    const urlDeezer = 'https://api.deezer.com/genre';
+    const urlProxy = `https://corsproxy.io/?${encodeURIComponent(urlDeezer)}`;
+
+    fetch(urlProxy)
+        .then(response => response.json())
+        .then(data => {
+            const grid = document.getElementById('genres-grid');
+            grid.innerHTML = ''; // On vide les placeholders
+
+            // On prend les 12 premiers genres pour la grille
+            data.data.slice(0, 12).forEach(genre => {
+                const card = document.createElement('div');
+                card.className = 'card-placeholder'; // Utilise ta classe CSS
+                card.textContent = genre.name;
+                card.style.backgroundImage = `url(${genre.picture_medium})`;
+                card.style.backgroundSize = 'cover';
+
+                card.onclick = () => {
+                    chargerMusiqueParGenreId(genre.id);
+                    // Optionnel : fermer la barre de recherche après clic
+                    document.getElementById('search-bar').classList.remove('active');
+                };
+
+                grid.appendChild(card);
+            });
+        });
+}
+
+function actualiserArtistesTendances() {
+    const url = 'https://api.deezer.com/chart/0/artists';
+    const urlProxy = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+
+    fetch(urlProxy)
+        .then(res => res.json())
+        .then(data => {
+            const grid = document.getElementById('artists-grid');
+            grid.innerHTML = '';
+
+            data.data.slice(0, 6).forEach(artist => {
+                const card = document.createElement('div');
+                card.className = 'card-placeholder';
+                card.innerHTML = `
+                    <img src="${artist.picture_samall}" style="border-radius:50%; width:50px;">
+                    <p>${artist.name}</p>
+                `;
+                grid.appendChild(card);
+            });
+        });
+}
+
+actualiserArtistesTendances();
+actualiserGrilleRechercheGenres();
 
 
