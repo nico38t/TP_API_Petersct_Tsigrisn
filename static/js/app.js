@@ -41,8 +41,6 @@ btnPass.onclick = passerMusiqueSuivante;
 // swipe mobile
 let startY = 0;
 
-
-
 document.querySelector('.tiktok-app')?.addEventListener('touchstart', e => {
     startY = e.changedTouches[0].screenY;
 });
@@ -53,11 +51,9 @@ document.querySelector('.tiktok-app')?.addEventListener('touchend', e => {
     }
 });
 
-
 const searchInput = document.getElementById('search-input');
 
 searchInput.addEventListener('keypress', (e) => {
-
     if (e.key === 'Enter') {
         const query = searchInput.value.trim();
 
@@ -115,8 +111,15 @@ function afficherFavoris() {
         const div = document.createElement('div');
         div.className = 'card-placeholder';
 
+        // Récupération de la cover de l'album pour l'afficher en fond
+        if (m.album && m.album.cover_medium) {
+            div.style.backgroundImage = `url(${m.album.cover_medium})`;
+            div.style.backgroundSize = 'cover';
+            div.style.backgroundPosition = 'center';
+        }
+
         div.innerHTML = `
-            <p>${m.title}</p>
+            <span>${m.title}</span>
             <small>${m.artist.name}</small>
             <button class="remove-btn">❌</button>
         `;
