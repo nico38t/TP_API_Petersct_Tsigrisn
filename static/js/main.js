@@ -1,279 +1,86 @@
-let playlistActuelle = [];
-let indexMusiqueActuelle = 0;
+import { setPlaylist, setIndex, mettreAJourLecteur } from './player.js';
 
+const proxy = url => `https://corsproxy.io/?${encodeURIComponent(url)}`;
 
-function chargerGenres() {
-    const urlDeezer = 'https://api.deezer.com/genre';
-    const urlProxy = `https://corsproxy.io/?${encodeURIComponent(urlDeezer)}`;
-
-    fetch(urlProxy)
-        .then(response => response.json())
-        .then(data => {
-            if (data.data) {
-                const conteneurGenres = document.getElementById('genre-list');
-                conteneurGenres.innerHTML = '';
-
-
-                const topGenres = data.data.slice(0, 10);
-
-                topGenres.forEach((genre, index) => {
-                    const btn = document.createElement('button');
-                    btn.className = 'genre-pill';
-
-                    const affichagegenre = document.createElement('div');
-                    if (index === 0) btn.classList.add('active');
-
-                    btn.textContent = genre.name;
-                    btn.dataset.id = genre.id;
-
-                    btn.addEventListener('click', function() {
-                        document.querySelectorAll('.genre-pill').forEach(b => b.classList.remove('active'));
-                        this.classList.add('active');
-                        chargerMusiqueParGenreId(genre.id);
-                    });
-
-                    conteneurGenres.appendChild(btn);
-                });
-
-
-                chargerMusiqueParGenreId(topGenres[0].id);
-            }
-        })
-        .catch(err => console.error("Erreur chargement genres :", err));
-}
-
-
-function chargerMusiqueParGenreId(genreId) {
-    const urlDeezer = `https://api.deezer.com/chart/${genreId}/tracks?limit=20`;
-    const urlProxy = `https://corsproxy.io/?${encodeURIComponent(urlDeezer)}`;
-
-    fetch(urlProxy)
-        .then(response => response.json())
-        .then(data => {
-            if (data.data && data.data.length > 0) {
-                playlistActuelle = data.data;
-
-                indexMusiqueActuelle = Math.floor(Math.random() * playlistActuelle.length);
-                mettreAJourLecteur(playlistActuelle[indexMusiqueActuelle]);
-            }
-        })
-        .catch(err => console.error("Erreur API Tracks :", err));
-}
-
-// ==========================================
-// 3. CHARGER LA MUSIQUE (RECHERCHE LIBRE)
-// ==========================================
-function rechercherMusiqueLibre(motCle) {
-    const urlDeezer = `https://api.deezer.com/search?q=${motCle}&limit=20`;
-    const urlProxy = `https://corsproxy.io/?${encodeURIComponent(urlDeezer)}`;
-
-    fetch(urlProxy)
-        .then(response => response.json())
-        .then(data => {
-            if (data.data && data.data.length > 0) {
-                playlistActuelle = data.data;
-                indexMusiqueActuelle = 0; // On commence par le 1er résultat de la recherche
-
-                mettreAJourLecteur(playlistActuelle[indexMusiqueActuelle]);
-
-                // On met à jour la barre du haut avec le mot clé et les artistes associés
-                mettreAJourBarreRecherche(motCle, data.data);
-            } else {
-                alert(`Aucun résultat trouvé pour "${motCle}" 😢`);
-            }
-        })
-        .catch(err => console.error("Erreur recherche :", err));
-}
-
-// ==========================================
-// 4. METTRE À JOUR LA BARRE (APRÈS RECHERCHE)
-// ==========================================
-function mettreAJourBarreRecherche(motCle, musiquesTrouvees) {
-    const conteneurGenres = document.getElementById('genre-list');
-    conteneurGenres.innerHTML = '';
-
-    // 1. Bouton "Retour à l'accueil"
-    const btnTop = document.createElement('button');
-    btnTop.className = 'genre-pill';
-    btnTop.textContent = '🔙 Top';
-    btnTop.addEventListener('click', function() {
-        chargerGenres();
-    });
-    conteneurGenres.appendChild(btnTop);
-
-    // 2. Bouton de la recherche actuelle
-    const btnRecherche = document.createElement('button');
-    btnRecherche.className = 'genre-pill active';
-    btnRecherche.textContent = motCle.charAt(0).toUpperCase() + motCle.slice(1);
-    conteneurGenres.appendChild(btnRecherche);
-
-    // 3. Extraire les artistes associés (featurings) sans doublons
-    let artistesAssocies = new Set();
-    musiquesTrouvees.forEach(musique => {
-        if (musique.artist.name.toLowerCase() !== motCle.toLowerCase()) {
-            artistesAssocies.add(musique.artist.name);
-        }
-    });
-
-    // 4. Créer les boutons pour les 3 premiers artistes associés
-    let topArtistes = Array.from(artistesAssocies).slice(0, 3);
-    topArtistes.forEach(artiste => {
-        const btnArtiste = document.createElement('button');
-        btnArtiste.className = 'genre-pill';
-        btnArtiste.textContent = artiste;
-
-        btnArtiste.addEventListener('click', function() {
-            rechercherMusiqueLibre(artiste);
-        });
-
-        conteneurGenres.appendChild(btnArtiste);
-    });
-}
-
-// ==========================================
-// 5. METTRE À JOUR LE LECTEUR (ÉCRAN)
-// ==========================================
-function mettreAJourLecteur(musique) {
-    if (!musique) return; // Sécurité
-
-    document.getElementById('bg-cover').src = musique.album.cover_xl;
-    document.getElementById('track-title').textContent = musique.title;
-    document.getElementById('track-artist').textContent = musique.artist.name;
-
-    const lecteur = document.getElementById('audio-player');
-    lecteur.src = musique.preview;
-    lecteur.play().catch(e => console.log("Lecture automatique bloquée par le navigateur", e));
-}
-
-// ==========================================
-// 6. PASSER AU SON SUIVANT (CROIX OU SWIPE)
-// ==========================================
-function passerMusiqueSuivante() {
-    if (playlistActuelle.length > 0) {
-        indexMusiqueActuelle++;
-        // Boucle infinie : si on arrive à la fin, on recommence au début de la liste
-        if (indexMusiqueActuelle >= playlistActuelle.length) {
-            indexMusiqueActuelle = 0;
-        }
-        mettreAJourLecteur(playlistActuelle[indexMusiqueActuelle]);
-    }
-}
-
-// ==========================================
-// 7. ÉVÉNEMENTS GLOBAUX (LOUPE, CROIX, SWIPE)
-// ==========================================
-
-// Clic sur la Loupe
-const btnRecherche = document.getElementById('btn-search');
-if (btnRecherche) {
-    btnRecherche.addEventListener('click', function() {
-
-        if (motCle && motCle.trim() !== "") {
-            rechercherMusiqueLibre(motCle);
-        }
-    });
-}
-
-// Clic sur la Croix (Passer)
-const btnPasser = document.getElementById('btn-pass');
-if (btnPasser) {
-    btnPasser.addEventListener('click', passerMusiqueSuivante);
-}
-
-// Gestion du Swipe vers le haut (Tactile)
-let touchStartY = 0;
-let touchEndY = 0;
-const appContainer = document.querySelector('.tiktok-app');
-
-if (appContainer) {
-    appContainer.addEventListener('touchstart', function(event) {
-        touchStartY = event.changedTouches[0].screenY;
-    });
-
-    appContainer.addEventListener('touchend', function(event) {
-        touchEndY = event.changedTouches[0].screenY;
-        // Si on a glissé vers le haut de plus de 50px
-        if (touchStartY - touchEndY > 50) {
-            passerMusiqueSuivante();
-        }
-    });
-}
-
-// ==========================================
-// LANCEMENT DE L'APPLICATION
-// ==========================================
-
-// Sélection des éléments
-const btnSearch = document.getElementById('btn-search');
-const btnSearchQuit = document.getElementById('btn-search-quit');
-const slidebar = document.querySelector('.slidebar');
-
-// Ouvrir la recherche
-btnSearch.addEventListener('click', () => {
-    slidebar.classList.add('active');
-    // Optionnel : mettre le focus sur l'input automatiquement
-    slidebar.querySelector('input').focus();
-});
-
-// Fermer la recherche
-btnSearchQuit.addEventListener('click', () => {
-    slidebar.classList.remove('active');
-});
-chargerGenres();
-
-
-function actualiserGrilleRechercheGenres() {
-    const urlDeezer = 'https://api.deezer.com/genre';
-    const urlProxy = `https://corsproxy.io/?${encodeURIComponent(urlDeezer)}`;
-
-    fetch(urlProxy)
-        .then(response => response.json())
-        .then(data => {
-            const grid = document.getElementById('genres-grid');
-            grid.innerHTML = ''; // On vide les placeholders
-
-            // On prend les 12 premiers genres pour la grille
-            data.data.slice(0, 12).forEach(genre => {
-                const card = document.createElement('div');
-                card.className = 'card-placeholder'; // Utilise ta classe CSS
-                card.textContent = genre.name;
-                card.style.backgroundImage = `url(${genre.picture_medium})`;
-                card.style.backgroundSize = 'cover';
-
-                card.onclick = () => {
-                    chargerMusiqueParGenreId(genre.id);
-                    // Optionnel : fermer la barre de recherche après clic
-                    document.getElementById('search-bar').classList.remove('active');
-                };
-
-                grid.appendChild(card);
-            });
-        });
-}
-
-function actualiserArtistesTendances() {
-    const url = 'https://api.deezer.com/chart/0/artists';
-    const urlProxy = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-
-    fetch(urlProxy)
+export function chargerGenres() {
+    fetch(proxy('https://api.deezer.com/genre'))
         .then(res => res.json())
         .then(data => {
-            const grid = document.getElementById('artists-grid');
-            grid.innerHTML = '';
+            const conteneur = document.getElementById('genre-list');
+            conteneur.innerHTML = '';
 
-            data.data.slice(0, 6).forEach(artist => {
-                const card = document.createElement('div');
-                card.className = 'card-placeholder';
-                card.innerHTML = `
-                    <img src="${artist.picture_samall}" style="border-radius:50%; width:50px;">
-                    <p>${artist.name}</p>
-                `;
-                grid.appendChild(card);
+            const topGenres = data.data.slice(0, 10);
+
+            topGenres.forEach((genre, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'genre-pill';
+                if (index === 0) btn.classList.add('active');
+
+                btn.textContent = genre.name;
+
+                btn.onclick = () => {
+                    document.querySelectorAll('.genre-pill')
+                        .forEach(b => b.classList.remove('active'));
+
+                    btn.classList.add('active');
+                    chargerMusiqueParGenreId(genre.id);
+                };
+
+                conteneur.appendChild(btn);
             });
+
+            chargerMusiqueParGenreId(topGenres[0].id);
         });
 }
 
-actualiserArtistesTendances();
-actualiserGrilleRechercheGenres();
+export function chargerMusiqueParGenreId(id) {
+    fetch(proxy(`https://api.deezer.com/chart/${id}/tracks?limit=20`))
+        .then(res => res.json())
+        .then(data => {
+            if (!data.data) return;
 
+            setPlaylist(data.data);
+            const random = Math.floor(Math.random() * data.data.length);
 
+            setIndex(random);
+            mettreAJourLecteur(data.data[random]);
+        });
+}
+
+export function rechercherMusiqueLibre(motCle) {
+    fetch(proxy(`https://api.deezer.com/search?q=${motCle}&limit=20`))
+        .then(res => res.json())
+        .then(data => {
+            if (!data.data.length) return alert("Aucun résultat");
+
+            setPlaylist(data.data);
+            setIndex(0);
+
+            mettreAJourLecteur(data.data[0]);
+            mettreAJourBarreRecherche(motCle, data.data);
+        });
+}
+
+function mettreAJourBarreRecherche(motCle, musiques) {
+    const conteneur = document.getElementById('genre-list');
+    conteneur.innerHTML = '';
+
+    const btnTop = document.createElement('button');
+    btnTop.textContent = '🔙 Top';
+    btnTop.onclick = chargerGenres;
+    conteneur.appendChild(btnTop);
+
+    const btnRecherche = document.createElement('button');
+    btnRecherche.textContent = motCle;
+    btnRecherche.className = 'active';
+    conteneur.appendChild(btnRecherche);
+
+    const artistes = [...new Set(musiques.map(m => m.artist.name))].slice(0, 3);
+
+    artistes.forEach(a => {
+        const btn = document.createElement('button');
+        btn.textContent = a;
+        btn.onclick = () => rechercherMusiqueLibre(a);
+        conteneur.appendChild(btn);
+    });
+}
