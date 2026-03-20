@@ -1,4 +1,6 @@
-import { chargerGenres, rechercherMusiqueLibre } from './main.js';
+import { chargerGenres, rechercherMusiqueLibre,
+    actualiserGrilleRechercheGenres,
+    actualiserArtistesTendances } from './main.js';
 import { passerMusiqueSuivante } from './player.js';
 
 // boutons
@@ -22,6 +24,8 @@ btnPass.onclick = passerMusiqueSuivante;
 // swipe mobile
 let startY = 0;
 
+
+
 document.querySelector('.tiktok-app')?.addEventListener('touchstart', e => {
     startY = e.changedTouches[0].screenY;
 });
@@ -32,5 +36,22 @@ document.querySelector('.tiktok-app')?.addEventListener('touchend', e => {
     }
 });
 
-// lancer app
+
+const searchInput = document.getElementById('search-input');
+
+searchInput.addEventListener('keypress', (e) => {
+
+    if (e.key === 'Enter') {
+        const query = searchInput.value.trim();
+
+        if (query !== "") {
+            rechercherMusiqueLibre(query);
+            slidebar.classList.remove('active');
+            searchInput.value = "";
+        }
+    }
+});
+
 chargerGenres();
+actualiserGrilleRechercheGenres();
+actualiserArtistesTendances();
