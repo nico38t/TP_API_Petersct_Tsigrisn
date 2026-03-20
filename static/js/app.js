@@ -1,4 +1,6 @@
-import { chargerGenres, rechercherMusiqueLibre } from './main.js';
+import { chargerGenres, rechercherMusiqueLibre,
+    actualiserGrilleRechercheGenres,
+    actualiserArtistesTendances } from './main.js';
 import { passerMusiqueSuivante } from './player.js';
 import { ajouterLike, supprimerLike, estLike, getLikes } from './likes.js';
 import { getMusiqueActuelle } from './player.js';
@@ -39,6 +41,8 @@ btnPass.onclick = passerMusiqueSuivante;
 // swipe mobile
 let startY = 0;
 
+
+
 document.querySelector('.tiktok-app')?.addEventListener('touchstart', e => {
     startY = e.changedTouches[0].screenY;
 });
@@ -46,6 +50,22 @@ document.querySelector('.tiktok-app')?.addEventListener('touchstart', e => {
 document.querySelector('.tiktok-app')?.addEventListener('touchend', e => {
     if (startY - e.changedTouches[0].screenY > 50) {
         passerMusiqueSuivante();
+    }
+});
+
+
+const searchInput = document.getElementById('search-input');
+
+searchInput.addEventListener('keypress', (e) => {
+
+    if (e.key === 'Enter') {
+        const query = searchInput.value.trim();
+
+        if (query !== "") {
+            rechercherMusiqueLibre(query);
+            slidebar.classList.remove('active');
+            searchInput.value = "";
+        }
     }
 });
 
@@ -122,3 +142,5 @@ function afficherFavoris() {
 // ------------------ INIT ------------------
 
 chargerGenres();
+actualiserGrilleRechercheGenres();
+actualiserArtistesTendances();

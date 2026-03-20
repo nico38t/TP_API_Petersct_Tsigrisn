@@ -84,3 +84,56 @@ function mettreAJourBarreRecherche(motCle, musiques) {
         conteneur.appendChild(btn);
     });
 }
+
+export function actualiserGrilleRechercheGenres() {
+    const url = 'https://api.deezer.com/genre';
+    fetch(proxy(url))
+        .then(res => res.json())
+        .then(data => {
+            const grid = document.getElementById('genres-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            data.data.slice(0, 12).forEach(genre => {
+                const card = document.createElement('div');
+                card.className = 'card-placeholder';
+                card.textContent = genre.name;
+                card.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${genre.picture_medium})`;
+                card.style.backgroundSize = 'cover';
+
+                card.onclick = () => {
+                    chargerMusiqueParGenreId(genre.id);
+                    document.getElementById('search-bar').classList.remove('active');
+                };
+
+                grid.appendChild(card);
+            });
+        });
+}
+
+export function actualiserArtistesTendances() {
+    const url = 'https://api.deezer.com/chart/0/artists';
+    fetch(proxy(url))
+        .then(res => res.json())
+        .then(data => {
+            const grid = document.getElementById('artists-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            data.data.slice(0, 12).forEach(artist => {
+                const card = document.createElement('div');
+                card.className = 'card-placeholder';
+                card.innerHTML = `
+                    <img src="${artist.picture_medium}" style="border-radius:50%; width:60px; height:60px; object-fit:cover; margin-bottom:10px;">
+                    <p>${artist.name}</p>
+                `;
+
+                card.onclick = () => {
+                    rechercherMusiqueLibre(artist.name);
+                    document.getElementById('search-bar').classList.remove('active');
+                };
+
+                grid.appendChild(card);
+            });
+        });
+}
