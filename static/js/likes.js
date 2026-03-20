@@ -9,6 +9,17 @@ export function ajouterLike(musique) {
     }
 }
 
+export function supprimerLike(id) {
+    let likes = getFromStorage('likes') || [];
+    likes = likes.filter(m => m.id !== id);
+    saveToStorage('likes', likes);
+}
+
+export function estLike(id) {
+    let likes = getFromStorage('likes') || [];
+    return likes.some(m => m.id === id);
+}
+
 export function getLikes() {
     return getFromStorage('likes') || [];
 }
