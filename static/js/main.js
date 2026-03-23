@@ -1,4 +1,5 @@
 import { setPlaylist, setIndex, mettreAJourLecteur } from './player.js';
+import { getLikes, getDislikes } from './likes.js';
 
 const proxy = url => `https://corsproxy.io/?${encodeURIComponent(url)}`;
 
@@ -33,17 +34,33 @@ export function chargerGenres() {
         });
 }
 
+// 🔥 VERSION AMÉLIORÉE
 export function chargerMusiqueParGenreId(id) {
     fetch(proxy(`https://api.deezer.com/chart/${id}/tracks?limit=20`))
         .then(res => res.json())
         .then(data => {
             if (!data.data) return;
 
-            setPlaylist(data.data);
-            const random = Math.floor(Math.random() * data.data.length);
+            const likes = getLikes();
+            const dislikes = getDislikes();
 
+            // ❌ enlever dislikes
+            let musiques = data.data.filter(m =>
+                !dislikes.some(d => d.id === m.id)
+            );
+
+            // ❤️ favoriser artistes likés
+            musiques.sort((a, b) => {
+                const scoreA = likes.some(l => l.artist.name === a.artist.name) ? 1 : 0;
+                const scoreB = likes.some(l => l.artist.name === b.artist.name) ? 1 : 0;
+                return scoreB - scoreA;
+            });
+
+            setPlaylist(musiques);
+
+            const random = Math.floor(Math.random() * musiques.length);
             setIndex(random);
-            mettreAJourLecteur(data.data[random]);
+            mettreAJourLecteur(musiques[random]);
         });
 }
 

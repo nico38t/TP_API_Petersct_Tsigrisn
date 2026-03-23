@@ -92,3 +92,9 @@ export function passerMusiqueSuivante() {
         mettreAJourLecteur(playlistActuelle[indexMusiqueActuelle]);
     }
 }
+
+
+export function jouerMusique(musique) {
+    mettreAJourLecteur(musique);
+}
+

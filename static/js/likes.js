@@ -1,5 +1,7 @@
 import { saveToStorage, getFromStorage } from './storage.js';
 
+// ------------------ LIKE ------------------
+
 export function ajouterLike(musique) {
     let likes = getFromStorage('likes') || [];
 
@@ -22,4 +24,24 @@ export function estLike(id) {
 
 export function getLikes() {
     return getFromStorage('likes') || [];
+}
+
+// ------------------ DISLIKE ------------------
+
+export function ajouterDislike(musique) {
+    let dislikes = getFromStorage('dislikes') || [];
+
+    if (!dislikes.find(m => m.id === musique.id)) {
+        dislikes.push(musique);
+        saveToStorage('dislikes', dislikes);
+    }
+}
+
+export function estDislike(id) {
+    let dislikes = getFromStorage('dislikes') || [];
+    return dislikes.some(m => m.id === id);
+}
+
+export function getDislikes() {
+    return getFromStorage('dislikes') || [];
 }
