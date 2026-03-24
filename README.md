@@ -14,8 +14,7 @@ Cette application est une page web statique utilisant des modules ES6. Pour l'in
 
 1. **Clonez ou téléchargez le projet** :
    ```
-   git clone https://github.com/votre-repo/TP_API_Petersct_Tsigrisn1.git
-   cd TP_API_Petersct_Tsigrisn1
+   git clone https://github.com/votre-repo/TP_API_Petersct_Tsigrisn.git
    ```
 
 2. **Lancez un serveur local** (requis pour les modules ES6 et les appels API) :
