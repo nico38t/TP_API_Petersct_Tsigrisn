@@ -1,10 +1,10 @@
 import { saveToStorage, getFromStorage } from './storage.js';
 
-// ------------------ LIKE ------------------
+// CRUD basique pour les likes et dislikes en local.
+// On check systématiquement les doublons via l'id avant l'insert.
 
 export function ajouterLike(musique) {
     let likes = getFromStorage('likes') || [];
-
     if (!likes.find(m => m.id === musique.id)) {
         likes.push(musique);
         saveToStorage('likes', likes);
@@ -26,11 +26,8 @@ export function getLikes() {
     return getFromStorage('likes') || [];
 }
 
-// ------------------ DISLIKE ------------------
-
 export function ajouterDislike(musique) {
     let dislikes = getFromStorage('dislikes') || [];
-
     if (!dislikes.find(m => m.id === musique.id)) {
         dislikes.push(musique);
         saveToStorage('dislikes', dislikes);

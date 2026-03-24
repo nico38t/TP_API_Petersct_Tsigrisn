@@ -465,3 +465,25 @@ button {
   opacity: 0;
   transition: opacity 0.2s;
 }
+
+.back-to-fav-btn {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.back-to-fav-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateX(-5px);
+}

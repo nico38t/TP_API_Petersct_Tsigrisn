@@ -1,40 +1,36 @@
 import { setPlaylist, setIndex, mettreAJourLecteur } from './player.js';
 import { getLikes, getDislikes } from './likes.js';
 
+// Bypass CORS pour l'API Deezer
 const proxy = url => `https://corsproxy.io/?${encodeURIComponent(url)}`;
 
+// Récupère et affiche la liste des top genres dans la navbar
 export function chargerGenres() {
     fetch(proxy('https://api.deezer.com/genre'))
         .then(res => res.json())
         .then(data => {
             const conteneur = document.getElementById('genre-list');
             conteneur.innerHTML = '';
-
             const topGenres = data.data.slice(0, 10);
 
             topGenres.forEach((genre, index) => {
                 const btn = document.createElement('button');
                 btn.className = 'genre-pill';
                 if (index === 0) btn.classList.add('active');
-
                 btn.textContent = genre.name;
 
                 btn.onclick = () => {
-                    document.querySelectorAll('.genre-pill')
-                        .forEach(b => b.classList.remove('active'));
-
+                    document.querySelectorAll('.genre-pill').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     chargerMusiqueParGenreId(genre.id);
                 };
-
                 conteneur.appendChild(btn);
             });
-
             chargerMusiqueParGenreId(topGenres[0].id);
         });
 }
 
-// 🔥 VERSION AMÉLIORÉE
+// Fetch les sons d'un genre, enleves les dislikes et trie pour remonter les artistes déjà likés
 export function chargerMusiqueParGenreId(id) {
     fetch(proxy(`https://api.deezer.com/chart/${id}/tracks?limit=20`))
         .then(res => res.json())
@@ -44,12 +40,10 @@ export function chargerMusiqueParGenreId(id) {
             const likes = getLikes();
             const dislikes = getDislikes();
 
-            // ❌ enlever dislikes
-            let musiques = data.data.filter(m =>
-                !dislikes.some(d => d.id === m.id)
-            );
+            // Clean des dislikes
+            let musiques = data.data.filter(m => !dislikes.some(d => d.id === m.id));
 
-            // ❤️ favoriser artistes likés
+            // Prio aux artistes favoris
             musiques.sort((a, b) => {
                 const scoreA = likes.some(l => l.artist.name === a.artist.name) ? 1 : 0;
                 const scoreB = likes.some(l => l.artist.name === b.artist.name) ? 1 : 0;
@@ -57,22 +51,20 @@ export function chargerMusiqueParGenreId(id) {
             });
 
             setPlaylist(musiques);
-
             const random = Math.floor(Math.random() * musiques.length);
             setIndex(random);
             mettreAJourLecteur(musiques[random]);
         });
 }
 
+// Moteur de recherche classique avec maj de l'UI
 export function rechercherMusiqueLibre(motCle) {
     fetch(proxy(`https://api.deezer.com/search?q=${motCle}&limit=20`))
         .then(res => res.json())
         .then(data => {
             if (!data.data.length) return alert("Aucun résultat");
-
             setPlaylist(data.data);
             setIndex(0);
-
             mettreAJourLecteur(data.data[0]);
             mettreAJourBarreRecherche(motCle, data.data);
         });
@@ -83,7 +75,7 @@ function mettreAJourBarreRecherche(motCle, musiques) {
     conteneur.innerHTML = '';
 
     const btnTop = document.createElement('button');
-    btnTop.textContent = '🔙 Top';
+    btnTop.innerHTML = '<i class="icon-back"></i> Top';
     btnTop.onclick = chargerGenres;
     conteneur.appendChild(btnTop);
 
@@ -93,7 +85,6 @@ function mettreAJourBarreRecherche(motCle, musiques) {
     conteneur.appendChild(btnRecherche);
 
     const artistes = [...new Set(musiques.map(m => m.artist.name))].slice(0, 3);
-
     artistes.forEach(a => {
         const btn = document.createElement('button');
         btn.textContent = a;
@@ -102,6 +93,7 @@ function mettreAJourBarreRecherche(motCle, musiques) {
     });
 }
 
+// Alim des grilles pour l'écran de recherche (genres et tendances)
 export function actualiserGrilleRechercheGenres() {
     const url = 'https://api.deezer.com/genre';
     fetch(proxy(url))
@@ -122,7 +114,6 @@ export function actualiserGrilleRechercheGenres() {
                     chargerMusiqueParGenreId(genre.id);
                     document.getElementById('search-bar').classList.remove('active');
                 };
-
                 grid.appendChild(card);
             });
         });
@@ -149,7 +140,6 @@ export function actualiserArtistesTendances() {
                     rechercherMusiqueLibre(artist.name);
                     document.getElementById('search-bar').classList.remove('active');
                 };
-
                 grid.appendChild(card);
             });
         });

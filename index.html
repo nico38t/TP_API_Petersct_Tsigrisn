@@ -9,6 +9,7 @@
 <body>
 
 <div class="tiktok-app">
+
   <div id="swipe-overlay" class="swipe-overlay"></div>
 
   <img id="bg-cover" src="" alt="Cover Art">
@@ -33,18 +34,18 @@
       <h1 id="track-title">Chargement...</h1>
       <h2 id="track-artist">Artiste</h2>
       <div class="music-animation">
-        <span class="music-note">🎵</span> En cours de lecture...
+        <i class="icon-music"></i> En cours de lecture...
       </div>
     </div>
 
     <div class="action-sidebar">
       <button class="action-btn btn-like" id="btn-like">
-        <div class="icon-circle"><img src="images/etoile-vide.svg" alt=""></div>
+        <div class="icon-circle"><img src="images/etoile-vide.svg" alt="Favori"></div>
         <span>Favori</span>
       </button>
 
       <button class="action-btn btn-pass" id="btn-pass">
-        <div class="icon-circle">❌</div>
+        <div class="icon-circle"><img src="images/croix.svg" alt="Favori"></div>
         <span>Passer</span>
       </button>
     </div>
@@ -53,6 +54,7 @@
   </main>
 
   <div class="slidebar" id="search-bar">
+
     <div class="search-header">
       <button id="btn-search-quit" class="search-icon">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -64,10 +66,11 @@
     </div>
 
     <div class="search-content">
+
       <section class="search-section">
         <h3>Mes favoris</h3>
         <div class="grid-scroll" id="favorites-grid">
-          <div class="card-placeholder">️</div>
+          <div class="card-placeholder"><i class="icon-heart"></i></div>
           <div class="card-placeholder"></div>
           <div class="card-placeholder"></div>
         </div>
@@ -90,7 +93,11 @@
           <div class="card-placeholder"></div>
         </div>
       </section>
+
     </div>
-  </div></div><script type="module" src="static/js/app.js"></script>
+  </div>
+</div>
+
+<script type="module" src="static/js/app.js"></script>
 </body>
 </html>

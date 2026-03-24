@@ -1,137 +1,140 @@
-import { chargerGenres, rechercherMusiqueLibre,
-    actualiserGrilleRechercheGenres,
-    actualiserArtistesTendances } from './main.js';
+import { chargerGenres, rechercherMusiqueLibre, actualiserGrilleRechercheGenres, actualiserArtistesTendances } from './main.js';
 import { passerMusiqueSuivante, jouerMusique, getMusiqueActuelle } from './player.js';
-import { ajouterLike, supprimerLike, estLike, getLikes } from './likes.js';
-import { ajouterDislike } from './likes.js';
+import { ajouterLike, supprimerLike, estLike, getLikes, ajouterDislike } from './likes.js';
 
-
-// boutons
+// Setup DOM refs
 const btnSearch = document.getElementById('btn-search');
 const btnPass = document.getElementById('btn-pass');
 const btnSearchQuit = document.getElementById('btn-search-quit');
 const slidebar = document.querySelector('.slidebar');
-
 const btnLike = document.getElementById('btn-like');
 const likeIcon = btnLike.querySelector('img');
-
 const inputSearch = document.getElementById('search-input');
+const overlay = document.getElementById('swipe-overlay');
+const app = document.querySelector('.tiktok-app');
 
-const volumeControl = document.getElementById('volume-control');
-const audio = document.getElementById('audio-player');
-
-// ------------------ SEARCH ------------------
-
+// --- Events UI Base ---
 btnSearch.onclick = () => {
     slidebar.classList.add('active');
     slidebar.querySelector('input').focus();
     afficherFavoris();
 };
-
-btnSearchQuit.onclick = () => {
-    slidebar.classList.remove('active');
-};
+btnSearchQuit.onclick = () => slidebar.classList.remove('active');
 
 inputSearch.addEventListener('keypress', e => {
-    if (e.key === 'Enter') {
-        rechercherMusiqueLibre(inputSearch.value);
-    }
+    if (e.key === 'Enter') rechercherMusiqueLibre(inputSearch.value);
 });
-
-// ------------------ PLAYER ------------------
-
 btnPass.onclick = passerMusiqueSuivante;
 
-// swipe mobile
-let startX = 0;
-let startY = 0;
+// --- Paramètres d'animation & Physique ---
+const DIST_THRESHOLD = 130;    // Distance min pour valider sans vitesse (px)
+const Y_DIST_THRESHOLD = 110;  // Seuil swipe haut (skip)
+const VELOCITY_THRESHOLD = 0.55; // Vitesse "flick" min (px/ms)
+const EXIT_ANIM_MS = 350;       // Synchro avec durée animation CSS
 
-const app = document.querySelector('.tiktok-app');
-const overlay = document.getElementById('swipe-overlay');
+// --- State interne du moteur de swipe ---
+let startX = 0, startY = 0, startTime = 0;
+let isDragging = false;
 
 app?.addEventListener('touchstart', e => {
-    // Ignorer les swipes si le menu de recherche est actif
-    if (slidebar.classList.contains('active')) {
-        return;
-    }
-    startX = e.changedTouches[0].screenX;
-    startY = e.changedTouches[0].screenY;
-});
+    if (slidebar.classList.contains('active')) return;
+    const touch = e.changedTouches[0];
+    startX = touch.screenX;
+    startY = touch.screenY;
+    startTime = Date.now();
+    isDragging = true;
+
+    // Coupe toute transition pour un drag super réactif au doigt
+    app.style.transition = 'none';
+}, {passive: true});
 
 app?.addEventListener('touchmove', e => {
-    // Ignorer les swipes si le menu de recherche est actif
-    if (slidebar.classList.contains('active')) {
-        return;
-    }
+    if (!isDragging || slidebar.classList.contains('active')) return;
 
-    const currentX = e.changedTouches[0].screenX;
-    const diffX = currentX - startX;
+    const touch = e.changedTouches[0];
+    const diffX = touch.screenX - startX;
+    const diffY = touch.screenY - startY;
 
-    // déplacement + rotation
-    app.style.transform = `translateX(${diffX}px) rotate(${diffX * 0.05}deg)`;
+    // Verrouillage de l'axe : si on bouge bcp plus en X qu'en Y
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+        // Feedback visuel Like/Dislike (Axe X)
+        // Ajout d'une rotation "amortie" basée sur la distance
+        const rotation = diffX * 0.07;
+        app.style.transform = `translateX(${diffX}px) rotate(${rotation}deg)`;
 
-    // effet visuel
-    if (diffX > 50) {
-        overlay.textContent = "❤️";
-        overlay.style.opacity = "1";
-        app.classList.add("swipe-like");
-        app.classList.remove("swipe-dislike");
-    } else if (diffX < -50) {
-        overlay.textContent = "👎";
-        overlay.style.opacity = "1";
-        app.classList.add("swipe-dislike");
-        app.classList.remove("swipe-like");
+        // Visual feedback overlay
+        if (diffX > 60) {
+            overlay.innerHTML = "<i class='icon-heart'></i>";
+            overlay.style.opacity = "1";
+            app.classList.add("swipe-like");
+            app.classList.remove("swipe-dislike");
+        } else if (diffX < -60) {
+            overlay.innerHTML = "<i class='icon-dislike'></i>";
+            overlay.style.opacity = "1";
+            app.classList.add("swipe-dislike");
+            app.classList.remove("swipe-like");
+        } else {
+            overlay.style.opacity = "0";
+            app.classList.remove("swipe-like", "swipe-dislike");
+        }
+
+        // Empêche le scroll natif Y pendant qu'on swipe horizontalement
+        if (e.cancelable) e.preventDefault();
     } else {
-        overlay.style.opacity = "0";
-        app.classList.remove("swipe-like", "swipe-dislike");
+        // Feedback visuel Skip (Axe Y, haut uniquement)
+        if (diffY < 0) {
+            // Amorti sur le drag vers le haut (rubber-band effect)
+            const dampedY = diffY * 0.6;
+            app.style.transform = `translateY(${dampedY}px)`;
+            overlay.style.opacity = "0";
+        }
     }
 });
 
 app?.addEventListener('touchend', e => {
-    // Ignorer les swipes si le menu de recherche est actif
-    if (slidebar.classList.contains('active')) {
-        return;
-    }
+    if (!isDragging || slidebar.classList.contains('active')) return;
+    isDragging = false;
 
-    const endX = e.changedTouches[0].screenX;
-    const endY = e.changedTouches[0].screenY;
+    const touch = e.changedTouches[0];
+    const diffX = touch.screenX - startX;
+    const diffY = startY - touch.screenY; // Inverse Y car écran 0 top
+    const timeTaken = Date.now() - startTime;
 
-    const diffX = endX - startX;
-    const diffY = startY - endY;
+    // Calcul vélocité (px par ms)
+    const velocityX = timeTaken > 0 ? (Math.abs(diffX) / timeTaken) : 0;
 
     const musique = getMusiqueActuelle();
-    if (!musique || !musique.id) {
-        resetPosition();
-        return;
-    }
 
-    // 🔥 PRIORITÉ AUX SWIPES HORIZONTAUX
-    if (Math.abs(diffX) > Math.abs(diffY)) {
+    // Remet une transition par défaut pour le reset ou le début de l'anim de sortie
+    app.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease';
 
-        // 👉 LIKE
-        if (diffX > 120) {
-            app.style.transform = "translateX(100vw) rotate(20deg)";
+    if (!musique || !musique.id) return resetPosition();
+
+    // Heuristique Flick (rapide) ou Drag long (lent)
+    const isFlickX = velocityX > VELOCITY_THRESHOLD && timeTaken < 250;
+    const absDiffY = Math.abs(touch.screenY - startY);
+
+    // Priorité axe horizontal
+    if (Math.abs(diffX) > absDiffY) {
+        if (diffX > DIST_THRESHOLD || (isFlickX && diffX > 0)) { // Swipe/Flick Droit -> Like
+            app.classList.add("exit-like"); // Trigger anim CSS
             ajouterLike(musique);
-            setTimeout(() => resetCard(), 300);
-        }
-
-        // 👉 DISLIKE (FIX ICI)
-        else if (diffX < -120) {
-            app.style.transform = "translateX(-100vw) rotate(-20deg)";
+            setTimeout(resetCard, EXIT_ANIM_MS);
+        } else if (diffX < -DIST_THRESHOLD || (isFlickX && diffX < 0)) { // Swipe/Flick Gauche -> Dislike
+            app.classList.add("exit-dislike"); // Trigger anim CSS
             ajouterDislike(musique);
-            setTimeout(() => resetCard(), 300);
-        }
-
-        else {
+            setTimeout(resetCard, EXIT_ANIM_MS);
+        } else {
             resetPosition();
         }
-    }
+    } else {
+        // Vélocité Axe Y (Skip)
+        const velocityY = timeTaken > 0 ? (Math.abs(startY - touch.screenY) / timeTaken) : 0;
+        const isFlickY = velocityY > VELOCITY_THRESHOLD && timeTaken < 250;
 
-    // 👉 SWIPE VERTICAL
-    else {
-        if (diffY > 100) {
-            app.style.transform = "translateY(-100vh)";
-            setTimeout(() => resetCard(), 300);
+        if (diffY > Y_DIST_THRESHOLD || (isFlickY && diffY > 0)) { // Swipe Haut -> Skip
+            app.classList.add("exit-skip"); // Trigger anim CSS
+            setTimeout(resetCard, EXIT_ANIM_MS);
         } else {
             resetPosition();
         }
@@ -139,101 +142,53 @@ app?.addEventListener('touchend', e => {
 });
 
 function resetPosition() {
-    app.style.transform = "translateX(0) rotate(0)";
+    // Transition "snap back" élastique
+    app.style.transition = 'transform 0.5s cubic-bezier(0.19, 1, 0.22, 1)';
+    app.style.transform = "translateX(0) translateY(0) rotate(0)";
     overlay.style.opacity = "0";
     app.classList.remove("swipe-like", "swipe-dislike");
+    // Nettoyage classes anim au cas où
+    setTimeout(() => app.classList.remove("exit-like", "exit-dislike", "exit-skip"), 100);
 }
 
 function resetCard() {
     passerMusiqueSuivante();
-    resetPosition();
+
+    // Setup carte suivante invisible
+    app.style.transition = 'none';
+    app.style.opacity = '0';
+    app.style.transform = "translateX(0) translateY(0) rotate(0)";
+
+    // Nettoyage état d'anim
+    app.classList.remove("exit-like", "exit-dislike", "exit-skip", "swipe-like", "swipe-dislike");
+    overlay.style.opacity = "0";
+
+    // Fade in de la nouvelle carte
+    setTimeout(() => {
+        app.style.transition = 'opacity 0.4s ease';
+        app.style.opacity = '1';
+    }, 50);
 }
 
-app?.addEventListener('touchend', e => {
-    // Ignorer les swipes si le menu de recherche est actif
-    if (slidebar.classList.contains('active')) {
-        return;
-    }
-
-    const endX = e.changedTouches[0].screenX;
-    const endY = e.changedTouches[0].screenY;
-
-    const diffX = endX - startX;
-    const diffY = startY - endY;
-
-    const musique = getMusiqueActuelle();
-    if (!musique) return;
-
-    // 👉 LIKE (droite)
-    if (diffX > 80) {
-        ajouterLike(musique);
-        console.log("❤️ Like");
-        passerMusiqueSuivante();
-    }
-
-    // 👉 DISLIKE (gauche)
-    else if (diffX < -80) {
-        ajouterDislike(musique);
-        console.log("👎 Dislike");
-        passerMusiqueSuivante();
-    }
-
-    // 👉 SKIP (haut)
-    else if (diffY > 80) {
-        console.log("⏭ Skip");
-        passerMusiqueSuivante();
-    }
-});
-
-const searchInput = document.getElementById('search-input');
-
-searchInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        const query = searchInput.value.trim();
-
-        if (query !== "") {
-            rechercherMusiqueLibre(query);
-            slidebar.classList.remove('active');
-            searchInput.value = "";
-        }
-    }
-});
-
-// ------------------ LIKE ------------------
-
+// --- Bouton Like statique ---
 btnLike.onclick = () => {
     const musique = getMusiqueActuelle();
     if (!musique) return;
-
-    if (estLike(musique.id)) {
-        supprimerLike(musique.id);
-    } else {
-        ajouterLike(musique);
-    }
-
+    estLike(musique.id) ? supprimerLike(musique.id) : ajouterLike(musique);
     updateLikeIcon();
 };
 
 function updateLikeIcon() {
     const musique = getMusiqueActuelle();
     if (!musique) return;
-
-    if (estLike(musique.id)) {
-        likeIcon.src = "images/etoile-pleine.svg";
-    } else {
-        likeIcon.src = "images/etoile-vide.svg";
-    }
+    likeIcon.src = estLike(musique.id) ? "images/etoile-pleine.svg" : "images/etoile-vide.svg";
 }
-
-// update icone quand musique change
 document.addEventListener('musiqueChangee', updateLikeIcon);
 
-// ------------------ FAVORIS ------------------
-
+// --- Rendu vue Favoris (Regroupement par artiste) ---
 function afficherFavoris() {
     const conteneur = document.getElementById('favorites-grid');
     conteneur.innerHTML = '';
-
     const likes = getLikes();
 
     if (likes.length === 0) {
@@ -241,95 +196,63 @@ function afficherFavoris() {
         return;
     }
 
-    // 🔥 regrouper par artiste
     const groupes = {};
-
     likes.forEach(m => {
         const artiste = m.artist.name;
-
-        if (!groupes[artiste]) {
-            groupes[artiste] = [];
-        }
-
+        if (!groupes[artiste]) groupes[artiste] = [];
         groupes[artiste].push(m);
     });
 
     Object.entries(groupes).forEach(([artiste, musiques]) => {
-
-        // 🔹 CAS 1 : un seul son → affichage direct
+        // Un seul son -> Card directe
         if (musiques.length === 1) {
             const m = musiques[0];
-
             const div = document.createElement('div');
             div.className = 'card-placeholder';
-
             div.innerHTML = `
                 <img src="${m.album.cover_medium}" style="width:100%; border-radius:8px;">
                 <p>${m.title}</p>
                 <small>${artiste}</small>
-                <button class="remove-btn">❌</button>
+                <button class="remove-btn"><i class="icon-close"></i></button>
             `;
-
             conteneur.appendChild(div);
 
-            // Gérer le clic principal AVANT le bouton
             div.addEventListener('click', (e) => {
-                // Si on clique sur la croix, ne pas jouer la musique
-                if (e.target.closest('.remove-btn')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return;
-                }
-                // Sinon, jouer la musique
+                if (e.target.closest('.remove-btn')) return;
                 jouerMusique(m);
                 slidebar.classList.remove('active');
             }, true);
 
-            // Récupérer le bouton après insertion dans le DOM
-            const removeBtn = div.querySelector('.remove-btn');
-            removeBtn.addEventListener('click', (e) => {
-                e.preventDefault();
+            div.querySelector('.remove-btn').addEventListener('click', (e) => {
                 e.stopPropagation();
                 supprimerLike(m.id);
                 afficherFavoris();
             }, true);
-        }
-
-        // 🔹 CAS 2 : plusieurs sons → carte artiste
-        else {
-            const cover = musiques[0].artist.picture_medium;
-
+        } else {
+            // Plusieurs sons -> Card dossier artiste
             const div = document.createElement('div');
             div.className = 'card-placeholder';
-
             div.innerHTML = `
-                <img src="${cover}" style="width:100%; border-radius:8px;">
+                <img src="${musiques[0].artist.picture_medium}" style="width:100%; border-radius:8px;">
                 <p>${artiste}</p>
                 <small>${musiques.length} sons</small>
             `;
-
-            // 🔥 clic = ouvrir ses sons
-            div.onclick = () => {
-                afficherSousCategorie(artiste, musiques);
-            };
-
+            div.onclick = () => afficherSousCategorie(artiste, musiques);
             conteneur.appendChild(div);
         }
     });
 }
 
-
 function afficherSousCategorie(artiste, musiques) {
     const conteneur = document.getElementById('favorites-grid');
     conteneur.innerHTML = '';
 
-    // 🔙 bouton retour
     const backBtn = document.createElement('button');
-    backBtn.textContent = "⬅ Retour";
+    backBtn.className = 'back-to-fav-btn';
+    backBtn.innerHTML = "<i class='icon-arrow-left'></i> Retour";
     backBtn.onclick = afficherFavoris;
     conteneur.appendChild(backBtn);
 
-    // titre artiste
     const title = document.createElement('h3');
     title.textContent = artiste;
     conteneur.appendChild(title);
@@ -337,53 +260,30 @@ function afficherSousCategorie(artiste, musiques) {
     musiques.forEach(m => {
         const div = document.createElement('div');
         div.className = 'card-placeholder';
-
         div.innerHTML = `
             <img src="${m.album.cover_medium}" style="width:100%; border-radius:8px;">
             <p>${m.title}</p>
-            <button class="remove-btn">❌</button>
+            <button class="remove-btn"><i class="icon-close"></i></button>
         `;
-
         conteneur.appendChild(div);
 
-        // Gérer le clic principal AVANT le bouton
         div.addEventListener('click', (e) => {
-            // Si on clique sur la croix, ne pas jouer la musique
-            if (e.target.closest('.remove-btn')) {
-                e.preventDefault();
-                e.stopPropagation();
-                return;
-            }
-            // Sinon, jouer la musique
+            if (e.target.closest('.remove-btn')) return;
             jouerMusique(m);
             slidebar.classList.remove('active');
         }, true);
 
-        // Récupérer le bouton après insertion dans le DOM
-        const removeBtn = div.querySelector('.remove-btn');
-        removeBtn.addEventListener('click', (e) => {
-            e.preventDefault();
+        div.querySelector('.remove-btn').addEventListener('click', (e) => {
             e.stopPropagation();
             supprimerLike(m.id);
-
             const nouveauxLikes = getLikes();
             const nouveauGroupe = nouveauxLikes.filter(x => x.artist.name === artiste);
-
-            if (nouveauGroupe.length === 0) {
-                afficherFavoris();
-            } else {
-                afficherSousCategorie(artiste, nouveauGroupe);
-            }
+            nouveauGroupe.length === 0 ? afficherFavoris() : afficherSousCategorie(artiste, nouveauGroupe);
         }, true);
     });
 }
 
-// ...existing code...
-
-
-
-// ------------------ INIT ------------------
-
+// --- Init app ---
 chargerGenres();
 actualiserGrilleRechercheGenres();
 actualiserArtistesTendances();
