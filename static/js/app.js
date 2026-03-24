@@ -38,6 +38,7 @@ let isDragging = false;
 
 app?.addEventListener('touchstart', e => {
     if (slidebar.classList.contains('active')) return;
+    if (e.target.closest('.top-bar')) return;
     const touch = e.changedTouches[0];
     startX = touch.screenX;
     startY = touch.screenY;
